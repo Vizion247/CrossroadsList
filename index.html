@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossroads Music</title>
+    <style>
+        /* Green Palette Colors */
+        :root {
+            --primary-green: #4CAF50;
+            --secondary-green: #81C784;
+            --light-green: #C8E6C9;
+            --dark-green: #388E3C;
+            --white: #FFFFFF;
+            --grey: #F5F5F5;
+            --text-color: #333333;
+        }
+
+        /* Global Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--grey);
+            color: var(--text-color);
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 0 20px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--primary-green);
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-container input:focus {
+            border-color: var(--dark-green);
+        }
+
+        /* File Grid */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .file-card {
+            background-color: var(--white);
+            border: 2px solid var(--secondary-green);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .file-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .file-icon {
+            font-size: 3em;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            font-size: 1em;
+            word-wrap: break-word;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            position: relative;
+            margin: 5% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 900px;
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .close-btn {
+            color: var(--white);
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2100;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #f1f1f1;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-body img, .modal-body iframe {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            .search-container input {
+                font-size: 0.9em;
+            }
+
+            .file-icon {
+                font-size: 2.5em;
+            }
+
+            .close-btn {
+                font-size: 25px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>Crossroads Music List</h1>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search by song name...">
+    </div>
+
+    <!-- File Grid -->
+    <div class="file-grid" id="fileGrid">
+        <!-- File Cards will be dynamically inserted here -->
+    </div>
+
+    <!-- Modal for Full-Screen View -->
+    <div id="fileModal" class="modal">
+        <span class="close-btn">&times;</span>
+        <div class="modal-content">
+            <div class="modal-body" id="modalBody">
+                <!-- Content (Image or PDF) will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array of file objects. Update this array with your actual file names.
+        const files = [
+           // { name: "Banana.pdf", type: "pdf" },
+           { name: "10000 reasons (Bless the Lord).jpg", type: "jpg" },
+           { name: "All Glory be to Christ.jpg", type: "jpg" },
+           { name: "All I have is Christ.jpg", type: "jpg" },
+           { name: "All Sufficient Merit.jpg", type: "jpg" },
+           { name: "Always.jpg", type: "jpg" },
+           { name: "Amazing Grace.jpg (My Chains Are Gone)", type: "jpg" },
+           { name: "Amazing Grace.jpg", type: "jpg" },
+           { name: "Angels we have heard on high.jpg", type: "jpg" },
+           { name: "At the Cross (Love Ran Red).jpg", type: "jpg" },
+           { name: "Be thou my vision.jpg", type: "jpg" },
+           { name: "Because of your Love.jpg", type: "jpg" },
+           { name: "Before the Throne of God.jpg", type: "jpg" },
+           { name: "Blessed Assurance.jpg", type: "jpg" },
+           { name: "Blessed be the name.jpg", type: "jpg" },
+           { name: "Build My Life.jpg", type: "jpg" },
+           { name: "By Faith.jpg", type: "jpg" },
+           { name: "Christ our Hope in Life and Death.jpg", type: "jpg" },
+           { name: "Christ the Sure and Steady Anchor.jpg", type: "jpg" },
+           { name: "Christmas Day.jpg", type: "jpg" },
+           { name: "Come all you unfaithful.jpg", type: "jpg" },
+           { name: "Come Behold the Wondrous Mystery.jpg", type: "jpg" },
+           { name: "Come Thou fount come Thou King.jpg", type: "jpg" },
+           { name: "Death was Arrested.jpg", type: "jpg" },
+           { name: "Defender (Call Upon The Name).jpg", type: "jpg" },
+           { name: "Emmanuel God with us.jpg", type: "jpg" },
+           { name: "Ever Be.jpg", type: "jpg" },
+           { name: "Forever Reign.jpg", type: "jpg" },
+           { name: "Give me Faith.jpg", type: "jpg" },
+           { name: "Glorious Day (Living He Loved Me).jpg", type: "jpg" },
+           { name: "Glory in the highest.jpg", type: "jpg" },
+           { name: "Go Tell it on the Mountain.jpg", type: "jpg" },
+           { name: "God is Able.jpg", type: "jpg" },
+           { name: "God of the Ages.jpg", type: "jpg" },
+           { name: "Grace on top of grace.jpg", type: "jpg" },
+           { name: "Graves into Gardens.jpg", type: "jpg" },
+           { name: "Great Are you Lord.jpg", type: "jpg" },
+           { name: "Great is thy faithfulness.jpg", type: "jpg" },
+           { name: "Hands Towards Heaven.jpg", type: "jpg" },
+           { name: "Hark the Herald Angels Sing.jpg", type: "jpg" },
+           { name: "His Mercy is More.jpg", type: "jpg" },
+           { name: "Hosanna (Praise is Rising).jpg", type: "jpg" },
+           { name: "House of The Lord.jpg", type: "jpg" },
+           { name: "How Deep the Father's Love For Us.jpg", type: "jpg" },
+           { name: "How Great Thou Art (until the last day).jpg", type: "jpg" },
+           { name: "How Great Thou Art.jpg", type: "jpg" },
+           { name: "In Christ Alone.jpg", type: "jpg" },
+           { name: "Indescribable.jpg", type: "jpg" },
+           { name: "Is He Worthy.jpg", type: "jpg" },
+           { name: "It is Well With My Soul.jpg", type: "jpg" },
+           { name: "Jesus only Jesus.jpg", type: "jpg" },
+           { name: "Jesus Saves.jpg", type: "jpg" },
+           { name: "Jesus Son of God.jpg", type: "jpg" },
+           { name: "Jesus.jpg", type: "jpg" },
+           { name: "Joy to the World (mash with Our God Saves).jpg", type: "jpg" },
+           { name: "Just as I am.jpg", type: "jpg" },
+           { name: "Light of the world.jpg", type: "jpg" },
+           { name: "Lion and the Lamb.jpg", type: "jpg" },
+           { name: "Living Hope.jpg", type: "jpg" },
+           { name: "Man of Sorrow.jpg", type: "jpg" },
+           { name: "New Doxology.jpg", type: "jpg" },
+           { name: "O Come To The Altar.jpg", type: "jpg" },
+           { name: "O Praise the Name (Anastasis).jpg", type: "jpg" },
+           { name: "Oh Holy Night.jpg", type: "jpg" },
+           { name: "Only A Holy God (with Holy, Holy, Holy).jpg", type: "jpg" },
+           { name: "Our God Saves.jpg", type: "jpg" },
+           { name: "Overcome.jpg", type: "jpg" },
+           { name: "Rejoice.jpg", type: "jpg" },
+           { name: "Resurrecting.jpg", type: "jpg" },
+           { name: "Speak oh Lord.jpg", type: "jpg" },
+           { name: "Surrender.jpg", type: "jpg" },
+           { name: "the Lord Our God.jpg", type: "jpg" },
+           { name: "This is the Gift of God.jpg", type: "jpg" },
+           { name: "This We Know.jpg", type: "jpg" },
+           { name: "Yahweh 2.jpg", type: "jpg" },
+           { name: "Yahweh.jpg", type: "jpg" },
+           { name: "Yet Not I but Through Christ in Me.jpg", type: "jpg" },
+           { name: "You You Are God.jpg", type: "jpg" },
+           { name: "Your Glory (with nothing but the Blood).jpg", type: "jpg" },
+           { name: "Your Grace Finds Me.jpg", type: "jpg" },
+           { name: "Your Grace is Enough.jpg", type: "jpg" },
+        
+            
+            
+            // Add more files as needed
+        ];
+
+        // Function to initialize and display the file grid
+        function initializeFileGrid() {
+            const fileGrid = document.getElementById('fileGrid');
+            fileGrid.innerHTML = '';
+
+            // Sort files alphabetically by name
+            const sortedFiles = files.sort((a, b) => a.name.localeCompare(b.name));
+
+            sortedFiles.forEach(file => {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'file-card';
+                fileCard.setAttribute('data-name', file.name.toLowerCase());
+
+                // Determine icon based on file type
+                let icon = '';
+                if (file.type === 'jpg') {
+                    icon = '📷';
+                } else if (file.type === 'pdf') {
+                    icon = '📄';
+                } else {
+                    icon = '📁';
+                }
+
+                fileCard.innerHTML = `
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-name">${file.name}</div>
+                `;
+
+                // Add click event to open modal
+                fileCard.addEventListener('click', () => openModal(file));
+
+                fileGrid.appendChild(fileCard);
+            });
+        }
+
+        // Function to open modal and display the selected file
+        function openModal(file) {
+            const modal = document.getElementById('fileModal');
+            const modalBody = document.getElementById('modalBody');
+
+            // Clear previous content
+            modalBody.innerHTML = '';
+
+            if (file.type === 'jpg') {
+                const img = document.createElement('img');
+                img.src = `files/${file.name}`;
+                img.alt = file.name;
+                modalBody.appendChild(img);
+            } else if (file.type === 'pdf') {
+                const iframe = document.createElement('iframe');
+                iframe.src = `files/${file.name}`;
+                iframe.type = 'application/pdf';
+                modalBody.appendChild(iframe);
+            }
+
+            modal.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            const modal = document.getElementById('fileModal');
+            modal.style.display = 'none';
+        }
+
+        // Event listener for close button
+        document.querySelector('.close-btn').addEventListener('click', closeModal);
+
+        // Event listener for clicks outside the modal content to close the modal
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('fileModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Search functionality
+        const searchBar = document.getElementById('searchBar');
+        searchBar.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const fileCards = document.querySelectorAll('.file-card');
+
+            fileCards.forEach(card => {
+                const fileName = card.getAttribute('data-name');
+                if (fileName.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize the file grid on page load
+        document.addEventListener('DOMContentLoaded', initializeFileGrid);
+    </script>
+
+</body>
+</html>
